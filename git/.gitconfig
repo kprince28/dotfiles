@@ -1,0 +1,13 @@
+[init]
+    defaultBranch = main
+[pull]
+    rebase = false
+[fetch]
+    prune = true
+[core]
+    editor = nano
+[alias]
+    st = status
+    co = checkout
+    br = branch
+    lg = log --oneline --graph --decorate
