@@ -91,8 +91,8 @@ else
 fi
 [[ "$(getent passwd "$USER" | cut -d: -f7)" == *zsh ]] && ok 'login shell is zsh' || note "login shell is not zsh (chsh -s $(command -v zsh))"
 if command -v zsh >/dev/null 2>&1; then
-  start=$(date +%s%N); zsh -i -c exit >/dev/null 2>&1; rc=$?; ms=$(( ($(date +%s%N)-start)/1000000 ))
-  [[ $rc -eq 0 ]] && ok "zsh starts cleanly (${ms}ms)" || bad 'zsh -i exits with an error'
+  start=$(date +%s%N); zerr="$(zsh -i -c 'exit 0' 2>&1 >/dev/null)"; rc=$?; ms=$(( ($(date +%s%N)-start)/1000000 ))
+  [[ $rc -eq 0 && -z "$zerr" ]] && ok "zsh starts cleanly (${ms}ms)" || bad "zsh -i reported problems: ${zerr:-exit code $rc}"
   (( ms > 1000 )) && note 'zsh startup is slow (>1s)'
   dup="$(zsh -i -c 'print -l $path' 2>/dev/null | sort | uniq -d)"
   [[ -z "$dup" ]] && ok 'no duplicate PATH entries' || note "duplicate PATH entries: $dup"

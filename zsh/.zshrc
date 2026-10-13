@@ -53,4 +53,4 @@ export PYENV_ROOT="$HOME/.pyenv"
 [[ -f /usr/share/doc/fzf/examples/completion.zsh ]] && source /usr/share/doc/fzf/examples/completion.zsh
 
 # Local-only interactive overrides (never committed).
-[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+if [[ -f "$HOME/.zshrc.local" ]]; then source "$HOME/.zshrc.local"; fi

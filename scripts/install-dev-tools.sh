@@ -74,12 +74,15 @@ install_nvm() {
 
 install_docker() {
   log 'Docker Engine + Compose v2 + Buildx (official repo)'
-  if have docker; then echo 'docker already installed; skipping (remove it first to switch to the official repo)'; return; fi
-  add_apt_repo docker https://download.docker.com/linux/ubuntu/gpg \
-    "deb [arch=$ARCH signed-by=$KEYRINGS/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable"
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  sudo systemctl enable --now docker
-  if ! id -nG "$USER" | grep -qw docker; then
+  if have docker; then
+    echo 'docker already installed; skipping install (remove it first to switch to the official repo)'
+  else
+    add_apt_repo docker https://download.docker.com/linux/ubuntu/gpg \
+      "deb [arch=$ARCH signed-by=$KEYRINGS/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable"
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo systemctl enable --now docker
+  fi
+  if getent group docker >/dev/null && ! id -nG "$USER" | grep -qw docker; then
     sudo usermod -aG docker "$USER"
     echo 'Added you to the docker group: log out/in for it to take effect.'
   fi
