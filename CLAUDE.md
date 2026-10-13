@@ -5,6 +5,7 @@ Ubuntu workstation bootstrap: zsh/git dotfiles plus an idempotent tool installer
 ## Layout
 - `install.sh`: entrypoint. Updates apt, runs the tool installer, symlinks dotfiles, sets up git identity, `gh` login, zsh as login shell.
 - `scripts/install-dev-tools.sh`: one `install_<tool>` function per tool; run all or name some (`./scripts/install-dev-tools.sh yq helm`). Opt-in extras (`ohmyzsh`, `krew`) are not in the default list.
+- `scripts/verify.sh`: read-only post-install validation (PASS/WARN/FAIL, non-zero exit on FAIL); `--docker-run` also runs hello-world.
 - `scripts/{enable,disable}-passwordless-sudo.sh`: optional and security-sensitive; never called automatically.
 - `zsh/.zshenv` (PATH/EDITOR, all shells), `zsh/.zshrc` (interactive only), `git/.gitconfig`.
 - `~/.zshenv.local` (secrets) and `~/.zshrc.local` (overrides) are machine-local and never committed.
