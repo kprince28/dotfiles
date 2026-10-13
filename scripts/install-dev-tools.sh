@@ -2,6 +2,7 @@
 # Installs developer tooling on Ubuntu. Idempotent: safe to re-run.
 # Usage: ./scripts/install-dev-tools.sh [tool ...]
 #   tools: base gh jq yq nvm docker vscode kubectl helm python claude   (default: all)
+#   opt-in (name them explicitly): ohmyzsh krew
 set -Eeuo pipefail
 
 # Nothing is pinned: each tool resolves its latest stable release when run.
@@ -13,6 +14,8 @@ have() { command -v "$1" >/dev/null 2>&1; }
 # latest_gh_tag <owner/repo>: latest release tag, via redirect (no API rate limit)
 latest_gh_tag() { curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$1/releases/latest" | sed 's|.*/||'; }
 
+export DEBIAN_FRONTEND=noninteractive
+command -v apt-get >/dev/null 2>&1 || { echo 'Debian/Ubuntu (apt) only.' >&2; exit 1; }
 [[ "$EUID" -ne 0 ]] || { echo 'Run as your regular user, not root.' >&2; exit 1; }
 
 ARCH="$(dpkg --print-architecture)"            # amd64 | arm64
@@ -126,6 +129,25 @@ install_claude() {
   log 'Claude Code (native installer)'
   have claude && { echo 'already installed'; return; }
   curl -fsSL https://claude.ai/install.sh | bash
+}
+
+# --- opt-in extras (not part of the default run) ---
+install_ohmyzsh() {
+  log 'Oh My Zsh (git clone, no remote script piped to a shell)'
+  have git || sudo apt-get install -y git
+  if [[ -d "$HOME/.oh-my-zsh" ]]; then git -C "$HOME/.oh-my-zsh" pull --ff-only
+  else git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"; fi
+}
+
+install_krew() {
+  log 'krew (kubectl plugin manager)'
+  have kubectl || { echo 'install kubectl first' >&2; return 1; }
+  [[ -x "${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew" ]] && { echo 'already installed'; return; }
+  local tmp os arch; tmp="$(mktemp -d)"; os=linux; arch="$ARCH"
+  curl -fsSL "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-${os}_${arch}.tar.gz" -o "$tmp/krew.tgz"
+  tar -xzf "$tmp/krew.tgz" -C "$tmp"
+  "$tmp/krew-${os}_${arch}" install krew
+  rm -rf "$tmp"
 }
 
 summary() {

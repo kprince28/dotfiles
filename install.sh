@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+export DEBIAN_FRONTEND=noninteractive
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 log() { printf '\n==> %s\n' "$*"; }
@@ -23,9 +25,15 @@ if [[ "$EUID" -eq 0 ]]; then
   exit 1
 fi
 
-log 'Installing common packages'
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo 'This script supports Debian/Ubuntu (apt) only.' >&2
+  exit 1
+fi
+
+log 'Updating system packages'
 sudo apt-get update
-sudo apt-get install -y git gh zsh curl wget unzip zip ca-certificates build-essential jq ripgrep fzf tmux tree xclip
+sudo apt-get upgrade -y
+sudo apt-get autoremove -y
 
 log 'Installing developer tools'
 "$ROOT/scripts/install-dev-tools.sh"
@@ -34,8 +42,15 @@ log 'Creating development directories'
 mkdir -p "$HOME/Developer"/{work,personal,learning}
 
 log 'Linking dotfiles (existing files backed up)'
+backup_and_link "$ROOT/zsh/.zshenv" "$HOME/.zshenv"
 backup_and_link "$ROOT/zsh/.zshrc" "$HOME/.zshrc"
 backup_and_link "$ROOT/git/.gitconfig" "$HOME/.gitconfig"
+
+log 'Local-only secrets file (~/.zshenv.local, never committed)'
+if [[ ! -f "$HOME/.zshenv.local" ]]; then
+  cp "$ROOT/zsh/.zshenv.local.example" "$HOME/.zshenv.local"
+fi
+chmod 600 "$HOME/.zshenv.local"
 
 log 'Git identity (only if not configured)'
 if [[ -z "$(git config --global --get user.name || true)" ]]; then
