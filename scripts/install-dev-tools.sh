@@ -38,6 +38,7 @@ install_base() {
   sudo apt-get install -y git zsh curl wget unzip zip gnupg ca-certificates \
     apt-transport-https software-properties-common build-essential pkg-config \
     jq ripgrep fd-find bat fzf tmux tree htop xclip openssh-client \
+    zsh-autosuggestions zsh-syntax-highlighting \
     sqlite3 libssl-dev libffi-dev
 }
 

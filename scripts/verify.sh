@@ -97,6 +97,9 @@ if command -v zsh >/dev/null 2>&1; then
   dup="$(zsh -i -c 'print -l $path' 2>/dev/null | sort | uniq -d)"
   [[ -z "$dup" ]] && ok 'no duplicate PATH entries' || note "duplicate PATH entries: $dup"
 fi
+for pl in zsh-autosuggestions zsh-syntax-highlighting; do
+  [[ -r /usr/share/$pl/$pl.zsh || -r "$HOME/.oh-my-zsh/custom/plugins/$pl/$pl.zsh" ]] && ok "$pl installed" || bad "$pl missing (./scripts/install-dev-tools.sh base)"
+done
 sudo -n true 2>/dev/null && note 'passwordless sudo is ENABLED (intended?)' || ok 'sudo requires a password (default)'
 
 printf '\n%d passed, %d warnings, %d failed\n' "$pass" "$warn" "$fail"

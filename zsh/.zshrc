@@ -1,10 +1,20 @@
 # Interactive zsh configuration. PATH/EDITOR live in ~/.zshenv.
+# History: big, shared across terminals, timestamped, de-duplicated.
 HISTFILE="$HOME/.zsh_history"
-HISTSIZE=10000
-SAVEHIST=10000
-setopt HIST_IGNORE_DUPS HIST_REDUCE_BLANKS SHARE_HISTORY AUTO_CD
+HISTSIZE=50000
+SAVEHIST=50000
+setopt EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_IGNORE_DUPS HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS HIST_VERIFY SHARE_HISTORY AUTO_CD
 
 bindkey -e
+
+# Up/Down search history by what you've already typed ("git " + Up = last git commands).
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+for _k in '^[[A' '^[OA' "${terminfo[kcuu1]}"; do [[ -n "$_k" ]] && bindkey "$_k" up-line-or-beginning-search; done
+for _k in '^[[B' '^[OB' "${terminfo[kcud1]}"; do [[ -n "$_k" ]] && bindkey "$_k" down-line-or-beginning-search; done
+unset _k
 
 # Oh My Zsh is optional: ./scripts/install-dev-tools.sh ohmyzsh
 # Without it we fall back to plain compinit and a dependency-free prompt.
@@ -51,6 +61,19 @@ export PYENV_ROOT="$HOME/.pyenv"
 # fzf bindings on Ubuntu, when available
 [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]] && source /usr/share/doc/fzf/examples/key-bindings.zsh
 [[ -f /usr/share/doc/fzf/examples/completion.zsh ]] && source /usr/share/doc/fzf/examples/completion.zsh
+
+# Inline suggestions from history (Right arrow / End accepts) and syntax colouring.
+# Packages: zsh-autosuggestions, zsh-syntax-highlighting. Highlighting must load last.
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+for _p in /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+          "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"; do
+  [[ -r "$_p" ]] && { source "$_p"; break; }
+done
+for _p in /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+          "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"; do
+  [[ -r "$_p" ]] && { source "$_p"; break; }
+done
+unset _p
 
 # Local-only interactive overrides (never committed).
 if [[ -f "$HOME/.zshrc.local" ]]; then source "$HOME/.zshrc.local"; fi
