@@ -5,7 +5,8 @@ Minimal, readable dotfiles for a fresh Ubuntu workstation.
 ## Setup
 
 ```bash
-cd ubuntu-dev-dotfiles
+git clone https://github.com/kprince28/dotfiles.git ~/dotfiles
+cd ~/dotfiles
 chmod +x install.sh scripts/*.sh
 ./install.sh
 ```
